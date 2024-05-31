@@ -34,15 +34,23 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <ul class="accordion">
-    <FolderItem
-      v-for="folderItem in folderItemList"
-      :key="folderItem.name"
-      class="accordion-item"
-      :path="[...path, folderItem.name]"
-      :item-type="folderItem.type"
-    >
-      {{ folderItem.name }}
-    </FolderItem>
-  </ul>
+  <div class="menu">
+    <ul class="menu-list">
+      <FolderItem
+        v-for="folderItem in folderItemList"
+        :key="folderItem.name"
+        class="accordion-item"
+        :path="[...path, folderItem.name]"
+        :item-type="folderItem.type"
+      >
+        {{ folderItem.name }}
+      </FolderItem>
+    </ul>
+  </div>
 </template>
+
+<style lang="scss">
+@use 'bulma/sass/base';
+@use 'bulma/sass/themes';
+@use 'bulma/sass/components/menu';
+</style>

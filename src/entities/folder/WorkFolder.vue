@@ -16,17 +16,25 @@ const selectedRootDirectory = computed(
 
 <template>
   <div class="work-folder">
-    <button type="button" @click="onClickSelectDirectory">
-      select directory
+    <button
+      type="button"
+      class="button is-fullwidth"
+      @click="onClickSelectDirectory"
+    >
+      <span class="icon is-small">
+        <i class="fas fa-folder-open"></i>
+      </span>
+
+      <span>select directory</span>
     </button>
 
     <FolderItemList v-if="selectedRootDirectory" :path="[]" />
   </div>
 </template>
 
-<style lang="scss" scoped>
-.work-folder {
-  display: flex;
-  flex-direction: column;
-}
+<style lang="scss">
+@use 'bulma/sass/base';
+@use 'bulma/sass/themes';
+@use 'bulma/sass/elements/button';
+@use 'bulma/sass/elements/icon';
 </style>

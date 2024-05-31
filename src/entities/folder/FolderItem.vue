@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs } from 'vue';
+import { ref, toRefs, defineProps } from 'vue';
 import type { Path } from '../../shared/lib/fileSystemApi';
 import type { ItemType } from './model';
 import FolderItemList from './FolderItemList.vue';
@@ -30,10 +30,11 @@ const onClickChangeSubItems = () => {
 </script>
 
 <template>
-  <div class="folder-item">
+  <li class="folder-item">
     <button
       type="button"
       class="accordion-button"
+      :class="{ 'is-active': openSubItems }"
       @click="onClickChangeSubItems"
     >
       <slot />
@@ -44,12 +45,11 @@ const onClickChangeSubItems = () => {
       class="accordion-collapse"
       :path="path"
     />
-  </div>
+  </li>
 </template>
 
-<style lang="scss" scoped>
-.folder-item {
-  display: flex;
-  flex-direction: column;
-}
+<style lang="scss">
+@use 'bulma/sass/base';
+@use 'bulma/sass/themes';
+@use 'bulma/sass/components/menu';
 </style>
