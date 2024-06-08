@@ -1,3 +1,12 @@
+@use 'bulma/sass/base';
+@use 'bulma/sass/themes';
+@use 'bulma/sass/helpers/spacing';
+@use 'bulma/sass/components/menu';
+@use 'bulma/sass/elements/button';
+@use 'bulma/sass/elements/icon';
+@use 'bulma/sass/components/dropdown';
+@use 'bulma/sass/components/card';
+
 :root {
   --bulma-block-spacing: 0;
 }

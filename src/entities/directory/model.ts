@@ -30,7 +30,7 @@ export type FolderItem = {
 };
 export type FolderState = FolderItem[];
 
-export const useFolderEntity = defineStore('folderEntity', () => {
+export const useDirectoryEntity = defineStore('directoryEntity', () => {
   const rootDirectory = shallowRef<FolderApi>();
 
   const stateItems: Map<KeyString<Path>, ItemFolder | ItemFile> = reactive(
@@ -139,7 +139,10 @@ export const useFolderEntity = defineStore('folderEntity', () => {
     } else {
       await rootDirectory.value?.addPath(path, 'folder');
     }
-    await readItem(path);
+    const parentPath = path.slice(0, -1);
+    if (stateItems.has(toKey(parentPath))) {
+      await readItem(parentPath);
+    }
   };
 
   return {

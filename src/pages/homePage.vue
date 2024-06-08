@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { DirectoryMenu } from '../entities/directory';
 import { ref, watchEffect } from 'vue';
-import { useFolderEntity } from '../entities/directory/model';
+import { useDirectoryEntity } from '../entities/directory/model';
 import mime from 'mime';
 import { isUndefined } from 'lodash-es';
 import type { Path } from '../shared/lib/fileSystemApi';
 import { WorkSpaceWidget } from '../widgets/WorkSpace';
+import { CreateFileForm } from '../features/createFile';
+import { ModalView } from '../shared/ui/modal';
 
-const folderEntity = useFolderEntity();
+const folderEntity = useDirectoryEntity();
 
 const openedPath = ref<Path>();
 
@@ -27,16 +29,22 @@ const onClickItem = (path: Path) => {
   }
 };
 
+const pathForNewFile = ref<Path>();
+
+const onNewFile = (path: Path) => {
+  pathForNewFile.value = path;
+};
+
 /*
 todo: добавить поддержку markdown Front Matter.
-todo: добавить контекстное меню
+todo: добавить контекстное меню в редактор
 */
 </script>
 
 <template>
   <div class="app-grid p-2">
     <div class="app-grid__menu">
-      <DirectoryMenu @click-item="onClickItem" />
+      <DirectoryMenu @click-item="onClickItem" @new-file="onNewFile" />
     </div>
 
     <WorkSpaceWidget
@@ -44,6 +52,23 @@ todo: добавить контекстное меню
       class="app-grid__workspace"
       :path-file="openedPath"
     />
+
+    <ModalView
+      v-if="pathForNewFile"
+      show-close-btn
+      @click-background="pathForNewFile = undefined"
+      @click-close-btn="pathForNewFile = undefined"
+    >
+      <div class="card">
+        <div class="card-content">
+          <CreateFileForm
+            :path="pathForNewFile"
+            @cancel="pathForNewFile = undefined"
+            @created="pathForNewFile = undefined"
+          />
+        </div>
+      </div>
+    </ModalView>
   </div>
 </template>
 

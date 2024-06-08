@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Path } from '../../shared/lib/fileSystemApi';
 import { computed, toRef, watch } from 'vue';
-import { useFolderEntity } from './model';
+import { useDirectoryEntity } from './model';
 import FolderItem from './DirectoryItem.vue';
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
   path: Path;
 }>();
 
-const folderEntity = useFolderEntity();
+const folderEntity = useDirectoryEntity();
 
 const item = computed(() => folderEntity.getItem(propsPath.value));
 
@@ -36,33 +36,32 @@ watch(
   { immediate: true },
 );
 
-const emits = defineEmits<{
+const emit = defineEmits<{
   clickItem: [path: Path];
+  newFile: [path: Path];
 }>();
 
 const onClickItem = (path: Path) => {
-  emits('clickItem', path);
+  emit('clickItem', path);
+};
+
+const onNewFile = (path: Path) => {
+  console.log('onNewFile');
+  emit('newFile', path);
 };
 </script>
 
 <template>
-  <div class="menu">
-    <ul class="menu-list">
-      <FolderItem
-        v-for="folderItem in folderItemList"
-        :key="folderItem.name"
-        :path="folderItem.path"
-        :item-type="folderItem.type"
-        @click-item="onClickItem"
-      >
-        {{ folderItem.name }}
-      </FolderItem>
-    </ul>
-  </div>
+  <ul class="menu-list">
+    <FolderItem
+      v-for="folderItem in folderItemList"
+      :key="folderItem.name"
+      :path="folderItem.path"
+      :item-type="folderItem.type"
+      @click-item="onClickItem"
+      @new-file="onNewFile"
+    >
+      {{ folderItem.name }}
+    </FolderItem>
+  </ul>
 </template>
-
-<style lang="scss">
-@use 'bulma/sass/base';
-@use 'bulma/sass/themes';
-@use 'bulma/sass/components/menu';
-</style>

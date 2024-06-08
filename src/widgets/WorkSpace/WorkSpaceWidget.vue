@@ -3,13 +3,13 @@ import { computed, ref, watch, watchEffect } from 'vue';
 import { EditorView } from '../../shared/ui/editor';
 import { isString, isUndefined } from 'lodash-es';
 import type { Path } from '../../shared/lib/fileSystemApi';
-import { useFolderEntity } from '../../entities/directory';
+import { useDirectoryEntity } from '../../entities/directory';
 
 const props = defineProps<{
   pathFile: Path;
 }>();
 
-const folderEntity = useFolderEntity();
+const folderEntity = useDirectoryEntity();
 
 const openedFile = computed((): File | undefined => {
   const path = props.pathFile;

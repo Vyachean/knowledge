@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, shallowRef, onBeforeUnmount, watchEffect } from 'vue';
+import { watch, shallowRef, onBeforeUnmount, watchEffect } from 'vue';
 import type { Transaction } from 'prosemirror-state';
 import { EditorState } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';

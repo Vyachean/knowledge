@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import FolderItemList from './DirectoryItemList.vue';
-import { useFolderEntity } from './model';
+import { useDirectoryEntity } from './model';
 import type { Path } from '../../shared/lib/fileSystemApi';
 
-const folderEntity = useFolderEntity();
+const folderEntity = useDirectoryEntity();
 
 const onClickSelectDirectory = async () => {
   await folderEntity.selectRootDirectory();
@@ -14,12 +14,17 @@ const selectedRootDirectory = computed(
   () => folderEntity.selectedRootDirectory,
 );
 
-const emits = defineEmits<{
+const emit = defineEmits<{
   clickItem: [path: Path];
+  newFile: [path: Path];
 }>();
 
 const onClickItem = (path: Path) => {
-  emits('clickItem', path);
+  emit('clickItem', path);
+};
+
+const onNewFile = (path: Path) => {
+  emit('newFile', path);
 };
 </script>
 
@@ -37,17 +42,13 @@ const onClickItem = (path: Path) => {
       <span>select directory</span>
     </button>
 
-    <FolderItemList
-      v-if="selectedRootDirectory"
-      :path="[]"
-      @click-item="onClickItem"
-    />
+    <div class="menu">
+      <FolderItemList
+        v-if="selectedRootDirectory"
+        :path="[]"
+        @click-item="onClickItem"
+        @new-file="onNewFile"
+      />
+    </div>
   </div>
 </template>
-
-<style lang="scss">
-@use 'bulma/sass/base';
-@use 'bulma/sass/themes';
-@use 'bulma/sass/elements/button';
-@use 'bulma/sass/elements/icon';
-</style>
