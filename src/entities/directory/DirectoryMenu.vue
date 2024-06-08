@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import FolderItemList from './FolderItemList.vue';
+import FolderItemList from './DirectoryItemList.vue';
 import { useFolderEntity } from './model';
+import type { Path } from '../../shared/lib/fileSystemApi';
 
 const folderEntity = useFolderEntity();
 
@@ -12,6 +13,14 @@ const onClickSelectDirectory = async () => {
 const selectedRootDirectory = computed(
   () => folderEntity.selectedRootDirectory,
 );
+
+const emits = defineEmits<{
+  clickItem: [path: Path];
+}>();
+
+const onClickItem = (path: Path) => {
+  emits('clickItem', path);
+};
 </script>
 
 <template>
@@ -28,7 +37,11 @@ const selectedRootDirectory = computed(
       <span>select directory</span>
     </button>
 
-    <FolderItemList v-if="selectedRootDirectory" :path="[]" />
+    <FolderItemList
+      v-if="selectedRootDirectory"
+      :path="[]"
+      @click-item="onClickItem"
+    />
   </div>
 </template>
 

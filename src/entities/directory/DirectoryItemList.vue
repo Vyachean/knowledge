@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Path } from '../../shared/lib/fileSystemApi';
-import { computed, defineProps, onBeforeUnmount, toRef, watch } from 'vue';
+import { computed, toRef, watch } from 'vue';
 import { useFolderEntity } from './model';
-import FolderItem from './FolderItem.vue';
+import FolderItem from './DirectoryItem.vue';
 
 const props = defineProps<{
   /**
@@ -13,24 +13,36 @@ const props = defineProps<{
 
 const folderEntity = useFolderEntity();
 
-const folderItemList = computed(() => folderEntity.getList(propsPath.value));
+const item = computed(() => folderEntity.getItem(propsPath.value));
+
+const folderItemList = computed(() => {
+  if (item.value?.type === 'folder') {
+    return item.value.list.map(({ name, type }) => ({
+      name,
+      type,
+      path: [...props.path, name],
+    }));
+  }
+  return undefined;
+});
 
 const propsPath = toRef(() => props.path);
-
-let stopWatchList: (() => void) | undefined;
 
 watch(
   propsPath,
   async (path) => {
-    stopWatchList?.();
-    stopWatchList = await folderEntity.watchList(path);
+    await folderEntity.fetchItem(path);
   },
   { immediate: true },
 );
 
-onBeforeUnmount(() => {
-  stopWatchList?.();
-});
+const emits = defineEmits<{
+  clickItem: [path: Path];
+}>();
+
+const onClickItem = (path: Path) => {
+  emits('clickItem', path);
+};
 </script>
 
 <template>
@@ -39,9 +51,9 @@ onBeforeUnmount(() => {
       <FolderItem
         v-for="folderItem in folderItemList"
         :key="folderItem.name"
-        class="accordion-item"
-        :path="[...path, folderItem.name]"
+        :path="folderItem.path"
         :item-type="folderItem.type"
+        @click-item="onClickItem"
       >
         {{ folderItem.name }}
       </FolderItem>

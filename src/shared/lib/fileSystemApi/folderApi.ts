@@ -43,6 +43,18 @@ export interface AddToFolder {
 }
 
 /**
+ * Добавить в папку файл или новую папку по пути
+ */
+export interface AddToPath {
+  (path: Path, type: 'folder'): Promise<FolderApi>;
+  (
+    path: Path,
+    type: 'file',
+    data: File | FileSystemWriteChunkType,
+  ): Promise<FileApi>;
+}
+
+/**
  * Поиск по названию
  */
 type FindEntry = (name: string) => Promise<FolderApi | FileApi | undefined>;
@@ -63,6 +75,7 @@ export interface FolderApi {
   remove: RemoveEntry;
   find: FindEntry;
   readPath: ReadPath;
+  addPath: AddToPath;
 }
 
 export const createFolderApi = (
@@ -181,12 +194,44 @@ export const createFolderApi = (
     return undefined;
   };
 
+  async function addPath(path: Path, type: 'folder'): Promise<FolderApi>;
+  async function addPath(
+    path: Path,
+    type: 'file',
+    data: File | FileSystemWriteChunkType,
+  ): Promise<FileApi>;
+  async function addPath(
+    path: Path,
+    type: 'file' | 'folder',
+    data?: File | FileSystemWriteChunkType,
+  ): Promise<FolderApi | FileApi> {
+    if (path.length) {
+      const name = path.at(-1);
+      if (!isUndefined(name)) {
+        const directoryPath = path.concat();
+        directoryPath.pop();
+
+        const directoryApi = await readPath(directoryPath);
+
+        if (directoryApi && 'add' in directoryApi) {
+          if (type === 'file' && data) {
+            return directoryApi.add(name, type, data);
+          } else if (type === 'folder') {
+            return directoryApi.add(name, type);
+          }
+        }
+      }
+    }
+    throw new Error('incorrect path');
+  }
+
   const folderApi = {
     read: readFolder,
     add,
     remove,
     find,
     readPath,
+    addPath,
   };
 
   return folderApi;
