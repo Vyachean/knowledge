@@ -8,6 +8,7 @@ defineProps({
 const emit = defineEmits<{
   clickCloseBtn: [];
   clickBackground: [];
+  keyEsc: [];
 }>();
 
 defineSlots<{
@@ -24,7 +25,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <dialog class="modal is-active" open>
+  <dialog class="modal is-active" open @keydown.esc="emit('keyEsc')">
     <div class="modal-background" @click="emit('clickBackground')" />
 
     <div class="modal-content">

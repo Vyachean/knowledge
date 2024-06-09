@@ -38,16 +38,16 @@ watch(
 
 const emit = defineEmits<{
   clickItem: [path: Path];
-  newFile: [path: Path];
+  create: [path: Path];
+  delete: [path: Path];
 }>();
 
 const onClickItem = (path: Path) => {
   emit('clickItem', path);
 };
 
-const onNewFile = (path: Path) => {
-  console.log('onNewFile');
-  emit('newFile', path);
+const onCreate = (path: Path) => {
+  emit('create', path);
 };
 </script>
 
@@ -59,9 +59,18 @@ const onNewFile = (path: Path) => {
       :path="folderItem.path"
       :item-type="folderItem.type"
       @click-item="onClickItem"
-      @new-file="onNewFile"
+      @create="onCreate"
+      @delete="emit('delete', $event)"
     >
       {{ folderItem.name }}
     </FolderItem>
+
+    <li>
+      <button type="button" @click="onCreate(path)">
+        <span class="icon is-small"><i class="fa-solid fa-plus" /></span>
+
+        <span class="ml-1"> Create </span>
+      </button>
+    </li>
   </ul>
 </template>

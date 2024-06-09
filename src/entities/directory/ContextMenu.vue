@@ -17,12 +17,12 @@ watchEffect(() => {
 const itemType = computed(() => item.value?.type);
 
 const emit = defineEmits<{
-  newFile: [path: Path];
+  create: [path: Path];
+  delete: [path: Path];
 }>();
 
-const onClickNewFile = () => {
-  console.log('onClickNewFile');
-  emit('newFile', props.path);
+const onClickCreate = () => {
+  emit('create', props.path);
 };
 </script>
 
@@ -34,11 +34,11 @@ const onClickNewFile = () => {
           <button
             type="button"
             class="context-menu__item dropdown-item"
-            @click="onClickNewFile"
+            @click="onClickCreate"
           >
-            <span class="icon is-small"><i class="fa-solid fa-file" /></span>
+            <span class="icon is-small"><i class="fa-solid fa-plus" /></span>
 
-            <span class="ml-1"> New File </span>
+            <span class="ml-1"> Create </span>
           </button>
 
           <!--
@@ -58,13 +58,15 @@ const onClickNewFile = () => {
           </button> 
         -->
 
-        <!--
-          <button type="button" class="context-menu__item dropdown-item">
+        <button
+          type="button"
+          class="context-menu__item dropdown-item"
+          @click="emit('delete', path)"
+        >
           <span class="icon is-small"><i class="fa-solid fa-trash"></i></span>
 
           <span class="ml-1"> Delete </span>
-          </button> 
-        -->
+        </button>
       </div>
     </div>
   </div>

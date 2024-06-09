@@ -10,7 +10,6 @@ const notificationSet = useNotificationSet();
     <NotificationItem
       v-for="[id, item] in notificationSet.set"
       :key="id"
-      :title="item.title"
       :content="item.content"
       :state="item.state"
       class="notificationList__item"

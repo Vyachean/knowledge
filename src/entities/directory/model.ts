@@ -4,7 +4,7 @@ import { createFileSystemApi } from '../../shared/lib/fileSystemApi';
 import { computed, reactive, shallowRef } from 'vue';
 import type { KeyString } from '../../shared/lib/convertKey';
 import { toKey } from '../../shared/lib/convertKey';
-import { isEqual } from 'lodash-es';
+import { isEqual, isUndefined } from 'lodash-es';
 import { createAsyncInterval } from '../../shared/lib/asyncInterval';
 
 export interface Item {
@@ -145,6 +145,18 @@ export const useDirectoryEntity = defineStore('directoryEntity', () => {
     }
   };
 
+  const deleteItem = async (path: Path) => {
+    const parentPath = path.slice(0, -1);
+    const name = path.at(-1);
+    const entity = await rootDirectory.value?.readPath(parentPath);
+    if (entity && 'remove' in entity && !isUndefined(name)) {
+      await entity.remove(name);
+      if (stateItems.has(toKey(parentPath))) {
+        await readItem(parentPath);
+      }
+    }
+  };
+
   return {
     selectRootDirectory,
     selectedRootDirectory,
@@ -152,5 +164,6 @@ export const useDirectoryEntity = defineStore('directoryEntity', () => {
     fetchItem,
     watchItem,
     writeItem,
+    deleteItem,
   };
 });

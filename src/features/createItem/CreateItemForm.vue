@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, type PropType } from 'vue';
+import { reactive, ref, watchEffect, type PropType } from 'vue';
 import type { Path } from '../../shared/lib/fileSystemApi';
 import type { ValueOf } from 'type-fest';
 import { useDirectoryEntity } from '../../entities/directory';
@@ -14,8 +14,9 @@ const props = defineProps({
 });
 
 const Extensions = {
-  md: 'text/markdown',
-  txt: 'text/plain',
+  '/': 'directory',
+  '.md': 'text/markdown',
+  '.txt': 'text/plain',
 } as const;
 
 const formState = reactive<{
@@ -23,7 +24,7 @@ const formState = reactive<{
   extension: ValueOf<typeof Extensions>;
 }>({
   name: undefined,
-  extension: Extensions.md,
+  extension: Extensions['/'],
 });
 
 const emit = defineEmits<{
@@ -42,24 +43,25 @@ const onSubmit = async () => {
     isLoading.value += 1;
     try {
       if (!isUndefined(formState.name)) {
-        const fileName = `${formState.name}.${findKey(Extensions, (v) => v === formState.extension) ?? ''}`;
+        const extension =
+          findKey(Extensions, (v) => v === formState.extension) ?? '';
+        const fileName = `${formState.name}${extension === '/' ? '' : extension}`;
         const pathNewFile = [...props.path, fileName];
         const hasItem = !!(await directoryEntity.fetchItem(pathNewFile));
         if (!hasItem) {
-          await directoryEntity.writeItem(
-            pathNewFile,
-            new File([], fileName, { type: formState.extension }),
-          );
+          const file =
+            formState.extension === 'directory'
+              ? undefined
+              : new File([], fileName, { type: formState.extension });
+          await directoryEntity.writeItem(pathNewFile, file);
           emit('created');
         } else {
           notification.addDanger({
-            title: 'Такой файл уже существует',
             content: `Файл с именем "${fileName}"" уже есть в папке "${props.path.join('/')}"`,
           });
         }
       } else {
         notification.addDanger({
-          title: 'Не указано имя файла',
           content: `Для создания файла укажите его имя`,
         });
       }
@@ -72,6 +74,12 @@ const onSubmit = async () => {
 const onClickCancel = () => {
   emit('cancel');
 };
+
+const refEl = ref<HTMLElement>();
+
+watchEffect(() => {
+  refEl.value?.focus();
+});
 </script>
 
 <template>
@@ -79,10 +87,11 @@ const onClickCancel = () => {
     <div class="field has-addons">
       <p class="control">
         <input
+          ref="refEl"
           v-model="formState.name"
           class="input"
           type="text"
-          placeholder="fileName"
+          placeholder="name"
         />
       </p>
 
@@ -94,7 +103,7 @@ const onClickCancel = () => {
               :key="extName"
               :value="extType"
             >
-              .{{ extName }}
+              {{ extName }}
             </option>
           </select>
         </span>

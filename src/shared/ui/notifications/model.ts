@@ -11,8 +11,7 @@ export type State =
   | 'link';
 
 type Notification = {
-  title: string;
-  content?: string;
+  content: string;
   timeout?: number;
   state?: State;
 };

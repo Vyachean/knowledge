@@ -21,7 +21,8 @@ const openSubItems = ref(false);
 
 const emit = defineEmits<{
   clickItem: [path: Path];
-  newFile: [path: Path];
+  create: [path: Path];
+  delete: [path: Path];
 }>();
 
 const onClickChangeSubItems = () => {
@@ -43,13 +44,17 @@ const onClickOutsideContextMenu = () => {
   isActiveContextMenu.value = false;
 };
 
-const onNewFile = (path: Path) => {
-  emit('newFile', path);
+const onCreate = (path: Path) => {
+  emit('create', path);
+};
+
+const onDelete = (path: Path) => {
+  emit('delete', path);
 };
 </script>
 
 <template>
-  <li class="directory-item folder-item">
+  <li class="directory-item">
     <div class="directory-item__label label has-addons">
       <button
         type="button"
@@ -75,7 +80,8 @@ const onNewFile = (path: Path) => {
         v-on-click-outside="onClickOutsideContextMenu"
         :path="path"
         @click="isActiveContextMenu = false"
-        @new-file="onNewFile"
+        @create="onCreate"
+        @delete="onDelete"
       />
     </div>
 
@@ -84,6 +90,8 @@ const onNewFile = (path: Path) => {
       class="directory-item__label"
       :path="path"
       @click-item="onClickItem"
+      @create="onCreate"
+      @delete="onDelete"
     />
   </li>
 </template>

@@ -6,8 +6,9 @@ import mime from 'mime';
 import { isUndefined } from 'lodash-es';
 import type { Path } from '../shared/lib/fileSystemApi';
 import { WorkSpaceWidget } from '../widgets/WorkSpace';
-import { CreateFileForm } from '../features/createFile';
+import { CreateItemForm } from '../features/createItem';
 import { ModalView } from '../shared/ui/modal';
+import DeleteItemForm from '../features/deleteItem/DeleteItemForm.vue';
 
 const folderEntity = useDirectoryEntity();
 
@@ -29,10 +30,13 @@ const onClickItem = (path: Path) => {
   }
 };
 
-const pathForNewFile = ref<Path>();
+const pathForNewItem = ref<Path>();
 
-const onNewFile = (path: Path) => {
-  pathForNewFile.value = path;
+const pathForDeleteItem = ref<Path>();
+
+const onDelete = (path: Path) => {
+  console.log(path);
+  pathForDeleteItem.value = path;
 };
 
 /*
@@ -44,7 +48,11 @@ todo: добавить контекстное меню в редактор
 <template>
   <div class="app-grid p-2">
     <div class="app-grid__menu">
-      <DirectoryMenu @click-item="onClickItem" @new-file="onNewFile" />
+      <DirectoryMenu
+        @click-item="onClickItem"
+        @create="pathForNewItem = $event"
+        @delete="onDelete"
+      />
     </div>
 
     <WorkSpaceWidget
@@ -54,17 +62,36 @@ todo: добавить контекстное меню в редактор
     />
 
     <ModalView
-      v-if="pathForNewFile"
+      v-if="pathForNewItem"
       show-close-btn
-      @click-background="pathForNewFile = undefined"
-      @click-close-btn="pathForNewFile = undefined"
+      @click-background="pathForNewItem = undefined"
+      @click-close-btn="pathForNewItem = undefined"
+      @key-esc="pathForNewItem = undefined"
     >
       <div class="card">
         <div class="card-content">
-          <CreateFileForm
-            :path="pathForNewFile"
-            @cancel="pathForNewFile = undefined"
-            @created="pathForNewFile = undefined"
+          <CreateItemForm
+            :path="pathForNewItem"
+            @cancel="pathForNewItem = undefined"
+            @created="pathForNewItem = undefined"
+          />
+        </div>
+      </div>
+    </ModalView>
+
+    <ModalView
+      v-if="pathForDeleteItem"
+      show-close-btn
+      @click-background="pathForDeleteItem = undefined"
+      @click-close-btn="pathForDeleteItem = undefined"
+      @key-esc="pathForDeleteItem = undefined"
+    >
+      <div class="card">
+        <div class="card-content">
+          <DeleteItemForm
+            :path="pathForDeleteItem"
+            @cancel="pathForDeleteItem = undefined"
+            @deleted="pathForDeleteItem = undefined"
           />
         </div>
       </div>
