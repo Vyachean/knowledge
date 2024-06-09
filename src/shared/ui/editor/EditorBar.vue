@@ -2,6 +2,7 @@
 import {
   toggleMark as commandToggleMark,
   setBlockType as commandSetBlockType,
+  wrapIn as commandWrapIn,
 } from 'prosemirror-commands';
 import { schema } from 'prosemirror-markdown';
 import type { EditorView } from 'prosemirror-view';
@@ -14,6 +15,12 @@ const props = defineProps<{
 
 const toggleMark = (...markProps: Parameters<typeof commandToggleMark>) =>
   commandToggleMark(...markProps)(
+    props.editorView.state,
+    props.editorView.dispatch.bind(props.editorView),
+  );
+
+const wrapIn = (...wrapProps: Parameters<typeof commandWrapIn>) =>
+  commandWrapIn(...wrapProps)(
     props.editorView.state,
     props.editorView.dispatch.bind(props.editorView),
   );
@@ -70,6 +77,39 @@ const onClickOutsideBlockType = () => {
       </button>
     </div>
 
+    <div class="control">
+      <button
+        class="button"
+        type="button"
+        @click="wrapIn(schema.nodes.bullet_list)"
+        @mousedown.prevent
+      >
+        <span class="icon is-small"><i class="fa-solid fa-list-ul"></i></span>
+      </button>
+    </div>
+
+    <div class="control">
+      <button
+        class="button"
+        type="button"
+        @click="wrapIn(schema.nodes.ordered_list)"
+        @mousedown.prevent
+      >
+        <span class="icon is-small"><i class="fa-solid fa-list-ol"></i></span>
+      </button>
+    </div>
+
+    <div class="control">
+      <button
+        class="button"
+        type="button"
+        @click="wrapIn(schema.nodes.blockquote)"
+        @mousedown.prevent
+      >
+        <span class="icon is-small"><i class="fa-solid fa-quote-left" /></span>
+      </button>
+    </div>
+
     <div
       v-on-click-outside="onClickOutsideBlockType"
       class="dropdown control"
@@ -79,8 +119,6 @@ const onClickOutsideBlockType = () => {
     >
       <button
         class="button"
-        aria-haspopup="true"
-        aria-controls="dropdown-menu2"
         type="button"
         @click="isActiveBlockTypeList = !isActiveBlockTypeList"
         @mousedown.prevent
@@ -92,7 +130,7 @@ const onClickOutsideBlockType = () => {
         </span>
       </button>
 
-      <div id="dropdown-menu2" class="dropdown-menu" role="menu">
+      <div class="dropdown-menu" role="menu">
         <div class="dropdown-content">
           <button
             class="dropdown-item"
@@ -105,6 +143,19 @@ const onClickOutsideBlockType = () => {
             </span>
 
             <span> Paragraph </span>
+          </button>
+
+          <button
+            class="dropdown-item"
+            type="button"
+            @click="onClickBlockType(schema.nodes.code_block)"
+            @mousedown.prevent
+          >
+            <span class="icon is-small">
+              <i class="fa-solid fa-code"></i>
+            </span>
+
+            <span> Code Block </span>
           </button>
 
           <hr class="dropdown-divider" />

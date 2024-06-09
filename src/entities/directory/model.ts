@@ -143,6 +143,9 @@ export const useDirectoryEntity = defineStore('directoryEntity', () => {
     if (stateItems.has(toKey(parentPath))) {
       await readItem(parentPath);
     }
+    if (stateItems.has(toKey(path))) {
+      await readItem(path);
+    }
   };
 
   const deleteItem = async (path: Path) => {
