@@ -3,7 +3,6 @@ import { ref, toRefs } from 'vue';
 import type { Path } from '../../shared/lib/fileSystemApi';
 import type { ItemType } from './model';
 import FolderItemList from './DirectoryItemList.vue';
-import type { EmptyObject } from 'type-fest';
 import ContextMenu from './ContextMenu.vue';
 import { vOnClickOutside } from '@vueuse/components';
 
@@ -15,7 +14,7 @@ const props = defineProps<{
 const { path, itemType } = toRefs(props);
 
 defineSlots<{
-  default: EmptyObject;
+  default(): unknown;
 }>();
 
 const openSubItems = ref(false);

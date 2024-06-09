@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useScrollLock } from '@vueuse/core';
-import type { EmptyObject } from 'type-fest';
 import { onBeforeUnmount } from 'vue';
 
 defineProps({
@@ -12,7 +11,7 @@ const emit = defineEmits<{
 }>();
 
 defineSlots<{
-  default: EmptyObject;
+  default(): unknown;
 }>();
 
 const isScrollLocked = useScrollLock(window);
@@ -52,5 +51,9 @@ dialog {
   margin: 0;
   width: 100vw;
   height: 100vh;
+}
+
+.modal {
+  --bulma-modal-content-width: fit-content;
 }
 </style>

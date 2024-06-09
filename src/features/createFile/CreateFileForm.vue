@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { reactive, type PropType } from 'vue';
+import { reactive, ref, type PropType } from 'vue';
 import type { Path } from '../../shared/lib/fileSystemApi';
 import type { ValueOf } from 'type-fest';
 import { useDirectoryEntity } from '../../entities/directory';
 import { findKey, isUndefined } from 'lodash-es';
+import { useNotification } from '../../shared/ui/notifications';
 
 const props = defineProps({
   path: {
@@ -32,15 +33,39 @@ const emit = defineEmits<{
 
 const directoryEntity = useDirectoryEntity();
 
+const isLoading = ref(0);
+
+const notification = useNotification();
+
 const onSubmit = async () => {
-  if (!isUndefined(formState.name)) {
-    const fileName = `${formState.name}.${findKey(Extensions, (v) => v === formState.extension) ?? ''}`;
-    const pathNewFile = [...props.path, fileName];
-    await directoryEntity.writeItem(
-      pathNewFile,
-      new File([], fileName, { type: formState.extension }),
-    );
-    emit('created');
+  if (!isLoading.value) {
+    isLoading.value += 1;
+    try {
+      if (!isUndefined(formState.name)) {
+        const fileName = `${formState.name}.${findKey(Extensions, (v) => v === formState.extension) ?? ''}`;
+        const pathNewFile = [...props.path, fileName];
+        const hasItem = !!(await directoryEntity.fetchItem(pathNewFile));
+        if (!hasItem) {
+          await directoryEntity.writeItem(
+            pathNewFile,
+            new File([], fileName, { type: formState.extension }),
+          );
+          emit('created');
+        } else {
+          notification.addDanger({
+            title: 'Такой файл уже существует',
+            content: `Файл с именем "${fileName}"" уже есть в папке "${props.path.join('/')}"`,
+          });
+        }
+      } else {
+        notification.addDanger({
+          title: 'Не указано имя файла',
+          content: `Для создания файла укажите его имя`,
+        });
+      }
+    } finally {
+      isLoading.value -= 1;
+    }
   }
 };
 
@@ -78,7 +103,15 @@ const onClickCancel = () => {
 
     <div class="field is-grouped">
       <div class="control">
-        <button class="button is-primary" type="submit">Create</button>
+        <button
+          class="button is-primary"
+          :class="{
+            'is-loading': isLoading,
+          }"
+          type="submit"
+        >
+          Create
+        </button>
       </div>
 
       <div class="control">
