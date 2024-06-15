@@ -80,6 +80,7 @@ export interface FolderApi {
 
 export const createFolderApi = (
   directoryHandle: FileSystemDirectoryHandle,
+  path: Path,
 ): FolderApi => {
   const readFolder: ReadFolder = async (): Promise<
     ReadonlyMap<string, FolderApi | FileApi>
@@ -87,14 +88,15 @@ export const createFolderApi = (
     const map = new Map<string, FileApi | FolderApi>();
 
     for await (const [name, handle] of directoryHandle.entries()) {
+      const apiPath = path.concat(name);
       if ('kind' in handle) {
         switch (handle.kind) {
           case 'directory': {
-            map.set(name, createFolderApi(handle));
+            map.set(name, createFolderApi(handle, apiPath));
             break;
           }
           case 'file': {
-            map.set(name, createFileApi(handle));
+            map.set(name, createFileApi(handle, apiPath));
             break;
           }
         }
@@ -107,12 +109,12 @@ export const createFolderApi = (
   const addFile = async (
     name: string,
     data?: File | FileSystemWriteChunkType,
-  ) => {
+  ): Promise<FileApi> => {
     const fileHandle = await directoryHandle.getFileHandle(name, {
       create: true,
     });
 
-    const fileApi = createFileApi(fileHandle);
+    const fileApi = createFileApi(fileHandle, path.concat(name));
 
     if (data) {
       await fileApi.write(data);
@@ -126,7 +128,7 @@ export const createFolderApi = (
       create: true,
     });
 
-    return createFolderApi(handle);
+    return createFolderApi(handle, path.concat(name));
   };
 
   async function add(name: string, type: 'folder'): Promise<FolderApi>;
@@ -225,7 +227,7 @@ export const createFolderApi = (
     throw new Error('incorrect path');
   }
 
-  const folderApi = {
+  const folderApi: FolderApi = {
     read: readFolder,
     add,
     remove,

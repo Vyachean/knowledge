@@ -1,22 +1,7 @@
 <script setup lang="ts">
-import { watch, shallowRef, onBeforeUnmount, watchEffect } from 'vue';
-import type { Transaction } from 'prosemirror-state';
-import { EditorState } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
-import { keymap } from 'prosemirror-keymap';
-import { baseKeymap } from 'prosemirror-commands';
-import { history, undo, redo } from 'prosemirror-history';
-import {
-  defaultMarkdownParser as markdownParser,
-  defaultMarkdownSerializer as markdownSerializer,
-  schema,
-} from 'prosemirror-markdown';
 import { useVModel } from '@vueuse/core';
-import { isUndefined } from 'lodash-es';
-import EditorBar from './EditorBar.vue';
-
-const refView = shallowRef<HTMLDivElement>();
-const editorView = shallowRef<EditorView>();
+import { useTiptap } from './tiptap';
+import TipTapEditorBar from './TipTapEditorBar.vue';
 
 const props = defineProps<{
   // eslint-disable-next-line vue/no-unused-properties -- используется в useVModel
@@ -25,92 +10,34 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:markdown': [markdown: string];
+  modS: [];
 }>();
 
 const contentMarkdownState = useVModel(props, 'markdown', emit);
 
-const createEditorState = (contentMarkdown: string) => {
-  return EditorState.create({
-    doc: markdownParser.parse(contentMarkdown),
-    schema,
-    plugins: [
-      history(),
-      keymap({
-        'Mod-z': undo,
-        'Shift-Mod-z': redo,
-        ...baseKeymap,
-      }),
-    ],
-  });
-};
-
-const editorState = createEditorState(contentMarkdownState.value);
-
-const dispatchTransaction = (transaction: Transaction) => {
-  if (editorView.value) {
-    const newState = editorView.value.state.apply(transaction);
-    editorView.value.updateState(newState);
-    contentMarkdownState.value = markdownSerializer.serialize(newState.doc);
-  }
-};
-
-watch(
-  refView,
-  (newRefView) => {
-    if (newRefView) {
-      editorView.value = new EditorView(newRefView, {
-        state: editorState,
-        dispatchTransaction,
-      });
-    } else {
-      editorView.value?.destroy();
-    }
-  },
-  { immediate: true },
-);
-
-watchEffect(() => {
-  if (!isUndefined(contentMarkdownState.value) && editorView.value) {
-    const currentState = markdownSerializer.serialize(
-      editorView.value.state.doc,
-    );
-    if (currentState !== contentMarkdownState.value) {
-      editorView.value.updateState(
-        createEditorState(contentMarkdownState.value),
-      );
-    }
-  }
-});
-
-onBeforeUnmount(() => {
-  editorView.value?.destroy();
-});
+const { tiptapEditor, EditorContentArea } = useTiptap(contentMarkdownState);
 </script>
 
 <template>
   <div class="editor">
-    <EditorBar
-      v-if="editorView"
+    <TipTapEditorBar
+      v-if="tiptapEditor"
       class="editor__panel"
-      :editor-view="editorView"
+      :editor="tiptapEditor"
     />
 
-    <div ref="refView" class="content editor__input-area textarea" />
+    <EditorContentArea
+      :editor="tiptapEditor"
+      class="content editor__input-area textarea"
+    />
 
     <pre class="editor__code">{{ contentMarkdownState }}</pre>
   </div>
 </template>
 
-<style lang="scss">
-@use 'bulma/sass/base';
-@use 'bulma/sass/themes';
-@use 'bulma/sass/helpers/spacing';
-@use 'bulma/sass/elements/content';
-@use 'bulma/sass/form/input-textarea';
-@use 'bulma/sass/elements/button';
-</style>
-
 <style lang="scss" scoped>
+@use 'bulma/sass/form/checkbox-radio';
+
 .editor {
   display: grid;
   grid-template:
@@ -124,6 +51,7 @@ onBeforeUnmount(() => {
   &__input-area {
     grid-area: input-area;
     height: auto;
+    --bulma-textarea-max-height: auto;
     display: flex;
     flex-direction: column;
     justify-content: stretch;
@@ -132,6 +60,26 @@ onBeforeUnmount(() => {
       flex-grow: 1;
       &:focus {
         outline: none;
+      }
+    }
+
+    :deep() {
+      li[data-checked] {
+        display: flex;
+        gap: 8px;
+
+        input[type='checkbox'] {
+          width: 1.25em;
+          height: 1.25em;
+        }
+
+        > {
+          label,
+          div {
+            @extend %checkbox-radio;
+            cursor: auto;
+          }
+        }
       }
     }
   }

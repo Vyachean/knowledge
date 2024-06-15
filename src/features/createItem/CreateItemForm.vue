@@ -53,7 +53,11 @@ const onSubmit = async () => {
             formState.extension === 'directory'
               ? undefined
               : new File([], fileName, { type: formState.extension });
-          await directoryEntity.writeItem(pathNewFile, file);
+          if (file) {
+            await directoryEntity.writeItem(pathNewFile, file);
+          } else {
+            await directoryEntity.writeItem(pathNewFile);
+          }
           emit('created');
         } else {
           notification.addDanger({

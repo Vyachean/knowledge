@@ -133,20 +133,30 @@ export const useDirectoryEntity = defineStore('directoryEntity', () => {
 
   const selectedRootDirectory = computed(() => !!rootDirectory.value);
 
-  const writeItem = async (path: Path, file?: File) => {
-    if (file) {
-      await rootDirectory.value?.addPath(path, 'file', file);
+  async function writeItem(path: Path): Promise<FolderApi>;
+  async function writeItem(path: Path, file: File): Promise<FileApi>;
+  async function writeItem(
+    path: Path,
+    file?: File,
+  ): Promise<FolderApi | FileApi> {
+    if (rootDirectory.value) {
+      const api = file
+        ? await rootDirectory.value.addPath(path, 'file', file)
+        : await rootDirectory.value.addPath(path, 'folder');
+
+      const parentPath = path.slice(0, -1);
+      if (stateItems.has(toKey(parentPath))) {
+        void readItem(parentPath);
+      }
+      if (stateItems.has(toKey(path))) {
+        void readItem(path);
+      }
+
+      return api;
     } else {
-      await rootDirectory.value?.addPath(path, 'folder');
+      throw new Error('rootDirectory not selected');
     }
-    const parentPath = path.slice(0, -1);
-    if (stateItems.has(toKey(parentPath))) {
-      await readItem(parentPath);
-    }
-    if (stateItems.has(toKey(path))) {
-      await readItem(path);
-    }
-  };
+  }
 
   const deleteItem = async (path: Path) => {
     const parentPath = path.slice(0, -1);

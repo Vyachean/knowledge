@@ -6,12 +6,14 @@
 @use 'bulma/sass/elements/notification';
 @use 'bulma/sass/elements/title';
 @use 'bulma/sass/elements/content';
+@use 'bulma/sass/form';
 @use 'bulma/sass/components/menu';
 @use 'bulma/sass/components/dropdown';
 @use 'bulma/sass/components/card';
 @use 'bulma/sass/components/message';
 @use 'bulma/sass/helpers/spacing';
 @use 'bulma/sass/helpers/gap';
+
 
 :root {
   --bulma-block-spacing: 0;

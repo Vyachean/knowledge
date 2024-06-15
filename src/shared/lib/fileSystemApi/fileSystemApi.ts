@@ -27,7 +27,7 @@ export const createFileSystemApi = async (
     return selectedFileSystemDirectoryHandle;
   };
 
-  const rootFolder = createFolderApi(await getRootHandler());
+  const rootFolder = createFolderApi(await getRootHandler(), []);
 
   return {
     folder: rootFolder,

@@ -1,9 +1,12 @@
+import type { ReadonlyDeep } from 'type-fest';
+import type { Path } from './folderApi';
+
 /**
  * Записать файл
  */
 export type WriteFile = (
   data: File | FileSystemWriteChunkType,
-) => Promise<void>;
+) => Promise<File>;
 
 /**
  * Прочесть файл
@@ -13,9 +16,13 @@ export type ReadFile = () => Promise<File>;
 export interface FileApi {
   read: ReadFile;
   write: WriteFile;
+  readonly path: ReadonlyDeep<Path>;
 }
 
-export const createFileApi = (fileHandle: FileSystemFileHandle): FileApi => {
+export const createFileApi = (
+  fileHandle: FileSystemFileHandle,
+  path: Path,
+): FileApi => {
   const read: ReadFile = async () => {
     return await fileHandle.getFile();
   };
@@ -29,10 +36,17 @@ export const createFileApi = (fileHandle: FileSystemFileHandle): FileApi => {
     await writableHandle.write(data);
 
     await writableHandle.close();
+
+    const writtenFile = await fileHandle.getFile();
+
+    return writtenFile;
   };
 
-  return {
+  const fileApi: FileApi = {
     read,
     write,
+    path,
   };
+
+  return fileApi;
 };

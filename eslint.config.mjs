@@ -11,7 +11,6 @@ const tsConfigPath = resolve(
 export default [
   ...config({
     tsConfigPath,
-    vue: true, // to support vue files
+    vue: true,
   }),
-  // define rules
 ]

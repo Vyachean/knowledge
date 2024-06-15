@@ -35,7 +35,6 @@ const pathForNewItem = ref<Path>();
 const pathForDeleteItem = ref<Path>();
 
 const onDelete = (path: Path) => {
-  console.log(path);
   pathForDeleteItem.value = path;
 };
 
